@@ -50,6 +50,43 @@ bool checkOverlap(int gameboard[8][8], int coordinateOne[2], int coordinateTwo[2
 	return true;
 }
 
+bool checkOverlapWithDirection(int gameboard[8][8], int x, int y, int direction, int length){
+	
+	while (length!=0){
+		if (gameboard[y][x]==0){
+			if (direction==3){
+				y++;
+			} else if (direction==2){
+				y--;
+			} else if (direction==0){
+				x--;
+			} else {
+				x++;
+			}
+			length--;
+		} else {
+			return false;
+		}
+	}
+	return true;
+}
+
+void placeBoat(int gameboard[8][8], int x, int y, int direction, int length){
+	while (length!=0){
+		gameboard[y][x]=1;
+		if (direction==3){
+			y++;
+		} else if (direction==2){
+			y--;
+		} else if (direction == 0){
+			x--;
+		} else {
+			x++;
+		}
+		length--;
+	}
+}
+
 /**
  * @brief function gets user input to determine coordinates of boat
  * @param pos used to indicate which coordinates will be grabbed, be it "first x", "first y", "last x", or "last y"
@@ -121,19 +158,7 @@ void determineCoordinates(int distance, int gameBoard[8][8]){
 	int x=coordinateOne[0];
 	int y=coordinateOne[1];
 	
-	while (length!=0){
-		gameBoard[y][x]=1;
-		if (direction==3){
-			y++;
-		} else if (direction==2){
-			y--;
-		} else if (direction==0){
-			x--;
-		} else {
-			x++;
-		}
-		length--;
-	}
+	placeBoat(gameBoard, x, y, direction, length);
 }
 
 /**
@@ -183,6 +208,36 @@ void populatePlayerBoard(int gameboardPlayer[8][8]){
 	determineCoordinates(2, gameboardPlayer);
 }
 
+void populateComputerBoard(int gameboard[8][8]){
+	//first choose carrier ship (5 spaces)
+	int boatsPlaced=0;
+	int length = 5;
+	while (boatsPlaced<5){
+		bool valid = false;
+		while (!valid){
+			srand(time(NULL));
+			int x = rand() %8;
+			int y = rand() %8;
+			int d = rand() %4;
+			valid=checkOverlapWithDirection(gameboard, x, y, d, length);
+			if (valid){
+				placeBoat(gameboard, x, y, d, length);
+				printf("(%d, %d), dir %d)\n", x, y, d);
+				boatsPlaced++;
+				if (boatsPlaced==1){
+					length--;
+				} else if (boatsPlaced==2){
+					length--;
+				} else if (boatsPlaced==4){
+					length--;
+				}
+				printGameBoard(gameboard);
+			}
+		}
+	}
+
+}
+
 int main(int argc, char **argv){
 	
 	int gameboardPlayer[8][8];
@@ -196,7 +251,8 @@ int main(int argc, char **argv){
 		}
 	}
 	
-	populatePlayerBoard(gameboardPlayer);
+	//populatePlayerBoard(gameboardPlayer);
+	populateComputerBoard(gameboardComputer);
 	return 0;
 }
 
