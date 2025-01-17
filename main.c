@@ -10,6 +10,12 @@ struct boat {
 	int hits;
 };
 
+struct coordinatesToBoat{
+	int id;
+	int x;
+	int y;
+};
+
 /**
  * @brief Function checks if boat will overlap with other ships
  * @param gameboard player gameboard used to place down ships
@@ -225,6 +231,10 @@ void printGameBoardInPlay(int board[8][8]){
 				printf("*");
 			} else if (board[i][j]==2){
 				printf("h");
+			}else if (board[i][j]==3){
+				printf("S");
+			} else if (board[i][j]==4){
+				printf("X");
 			}
 			printf(" ");
 		}
@@ -285,7 +295,6 @@ struct boat *populateComputerBoard(int gameboard[8][8]){
 			if (valid){
 				struct boat comp = placeBoat(gameboard, x, y, d, length);
 				fleet[boatsPlaced]=comp;
-				printf("%d\n", fleet[boatsPlaced].x);
 				boatsPlaced++;
 				if (boatsPlaced==1){
 					length--;
@@ -300,6 +309,75 @@ struct boat *populateComputerBoard(int gameboard[8][8]){
 
 }
 
+/**
+ * @brief creates a lookup table to find what coordinate matches a boat
+ * @param fleet
+ */
+struct coordinatesToBoat *createCoordinateToBoatTable(struct boat *fleet){
+	struct coordinatesToBoat *table=malloc(sizeof(struct coordinatesToBoat)*17);
+	int pos=0;
+	for (int i=0; i<5; i++){
+		
+		int x=fleet[i].x;
+		int y=fleet[i].y;
+		int direction=fleet[i].direction;
+		int length=fleet[i].length;
+		
+		while (length!=0){
+			struct coordinatesToBoat val = {i, x, y};
+			table[pos]=val;
+			pos++;
+			if (direction==3){
+				y++;
+			} else if (direction==2){
+				y--;
+			} else if (direction == 0){
+				x--;
+			} else {
+				x++;
+			}
+			length--;
+		}
+	}
+}
+
+/**
+ * @brief function gets user input to determine coordinates of boat
+ * @param pos used to indicate which coordinates will be grabbed, be it "first x", "first y", "last x", or "last y"
+ */
+void getHitCoordinate(int gameboard[8][8]){
+	bool valid = false;
+	while (!valid){
+		int x =-1;
+		while (x<0 || x>7){
+			printf("Please enter the x coordinate of where you want to hit: ");
+			scanf("%d", &x);
+			if (x<0 || x>7){
+				printf("Please enter a value between 0 and 7.");
+			}
+		}
+		int y=-1;
+		while (y<0 || y>7){
+			printf("Please enter the y coordinate of where you want to hit: ");
+			scanf("%d", &y);
+			if (y<0 || y>7){
+				printf("Please enter a value between 0 and 7.");
+			}
+		}
+		if (gameboard[y][x]>=2 ){
+			printf("you've already tried hitting this spot! Try a different coordinate \n");
+		} else if (gameboard[y][x]==1){
+			printf("HIT!");
+			gameboard[y][x]=2;
+			return;
+			//logic to check if the boat is sunk
+		} else {
+			printf("Nothing is there...");
+			gameboard[y][x]=4;
+			return;
+		}
+	}
+}
 int main(int argc, char **argv){
 	
 	int gameboardPlayer[8][8];
@@ -313,11 +391,19 @@ int main(int argc, char **argv){
 		}
 	}
 	
-	
-	//
 	struct boat *fleetPlayer = populatePlayerBoard(gameboardPlayer);
 	struct boat *fleetComp = populateComputerBoard(gameboardComputer);
 	
+	struct coordinatesToBoat *lookupPlayer = createCoordinateToBoatTable(fleetPlayer);
+	struct coordinatesToBoat *lookupComp = createCoordinateToBoatTable(fleetComp);
+	
+	bool win=false;
+	while(!win){
+		printf("**********************************************************\n\n\n\n");
+		printf("Your turn!\n");
+		printGameBoardInPlay(gameboardComputer);
+		getHitCoordinate("x");
+	}
 	
 	return 0;
 }
