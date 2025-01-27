@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 struct boat {
+	int id;
 	int x;
 	int y;
 	int direction;
@@ -99,9 +100,9 @@ bool checkOverflow(int x, int y, int direction, int length){
 	return true;
 }
 
-struct boat placeBoat(int gameboard[8][8], int x, int y, int direction, int length){
+struct boat placeBoat(int gameboard[8][8], int x, int y, int direction, int length, int id){
 	while (length!=0){
-		gameboard[y][x]=1;
+		gameboard[y][x]=id;
 		if (direction==3){
 			y++;
 		} else if (direction==2){
@@ -113,7 +114,7 @@ struct boat placeBoat(int gameboard[8][8], int x, int y, int direction, int leng
 		}
 		length--;
 	}
-	struct boat toPlace={x, y,direction, length, 0};
+	struct boat toPlace={id, x, y,direction, length, 0};
 	return toPlace;
 }
 
@@ -139,7 +140,7 @@ int getCoordinate(char pos[]){
  * @param distance the number of holes the boat can occupy
  * @param gameBoard the players gameboard
  */
-struct boat determineCoordinates(int distance, int gameBoard[8][8]){
+struct boat determineCoordinates(int distance, int gameBoard[8][8], int id){
 	int coordinateOne[2] = {-1, -1};
 	int coordinateTwo[2] = {-1, -1};
 	int length= 0;
@@ -188,7 +189,7 @@ struct boat determineCoordinates(int distance, int gameBoard[8][8]){
 	int x=coordinateOne[0];
 	int y=coordinateOne[1];
 	
-	struct boat toAdd = placeBoat(gameBoard, x, y, direction, length);
+	struct boat toAdd = placeBoat(gameBoard, x, y, direction, length, id);
 	return toAdd;
 }
 
@@ -204,7 +205,7 @@ void printGameBoard(int board[8][8]){
 			if (board[i][j]==0){
 				printf("*");
 			} else {
-				printf("d");
+				printf("b");
 			}
 			printf(" ");
 		}
@@ -221,10 +222,14 @@ void printGameBoardInPlay(int board[8][8]){
 	for (int i=0; i<8; i++){
 		printf("%d ", i);
 		for (int j=0; j<8; j++){
-			if (board[i][j]==0){
-				printf("*");
+			if (board[i][j]==1){
+				printf("X");
 			} else if (board[i][j]==2){
+				printf("S");
+			} else if (board[i][j]>=13){
 				printf("h");
+			} else {
+				printf("*");
 			}
 			printf(" ");
 		}
@@ -241,27 +246,27 @@ struct boat *populatePlayerBoard(int gameboardPlayer[8][8]){
 	struct boat *fleet=malloc(sizeof(struct boat)*5);
 	
 	printf("Lets start by placing your carrier ship (5 spaces)\n");
-	struct boat carrier = determineCoordinates(5, gameboardPlayer);
+	struct boat carrier = determineCoordinates(5, gameboardPlayer, 3);
 	fleet[0]=carrier;
 	
 	printGameBoard(gameboardPlayer);
 	printf("Now lets place your battleship (4 spaces) \n");
-	struct boat battleship = determineCoordinates(4, gameboardPlayer);
+	struct boat battleship = determineCoordinates(4, gameboardPlayer, 4);
 	fleet[1]=battleship;
 	
 	printGameBoard(gameboardPlayer);
 	printf("Smart choice! Where should we put the cruiser (3 spaces) \n");
-	struct boat cruiser = determineCoordinates(3, gameboardPlayer);
+	struct boat cruiser = determineCoordinates(3, gameboardPlayer, 5);
 	fleet[2]=cruiser;
 	
 	printGameBoard(gameboardPlayer);
 	printf("What about the submarine? (3 spaces) \n");
-	struct boat submarine = determineCoordinates(3, gameboardPlayer);
+	struct boat submarine = determineCoordinates(3, gameboardPlayer, 6);
 	fleet[3]=submarine;
 	
 	printGameBoard(gameboardPlayer);
 	printf("Finally, what about the destroyer? (2 spaces) \n");
-	struct boat destroyer = determineCoordinates(2, gameboardPlayer);
+	struct boat destroyer = determineCoordinates(2, gameboardPlayer, 7);
 	fleet[4]=destroyer;
 }
 
@@ -273,20 +278,22 @@ struct boat *populateComputerBoard(int gameboard[8][8]){
 	//first choose carrier ship (5 spaces)
 	int boatsPlaced=0;
 	int length = 5;
-	struct boat *fleet= malloc(sizeof(struct boat)*5);;
+	srand(time(NULL));
+	struct boat *fleet= malloc(sizeof(struct boat)*5);
+	int id=3;
 	while (boatsPlaced<5){
 		bool valid = false;
 		while (!valid){
-			srand(time(NULL));
 			int x = rand() %8;
 			int y = rand() %8;
 			int d = rand() %4;
 			valid=checkOverlapWithDirection(gameboard, x, y, d, length) && checkOverflow(x, y, d, length);
 			if (valid){
-				struct boat comp = placeBoat(gameboard, x, y, d, length);
+				struct boat comp = placeBoat(gameboard, x, y, d, length, id);
 				fleet[boatsPlaced]=comp;
 				printf("%d\n", fleet[boatsPlaced].x);
 				boatsPlaced++;
+				id++;
 				if (boatsPlaced==1){
 					length--;
 				} else if (boatsPlaced==2){
