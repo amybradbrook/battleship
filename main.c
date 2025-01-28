@@ -307,6 +307,45 @@ struct boat *populateComputerBoard(int gameboard[8][8]){
 
 }
 
+/**
+ * @brief function gets user input to determine coordinates of boat
+ * @param pos used to indicate which coordinates will be grabbed, be it "first x", "first y", "last x", or "last y"
+ */
+int getHitCoordinate(int gameboard[8][8]){
+	bool valid = false;
+	while (!valid){
+		int x =-1;
+		while (x<0 || x>7){
+			printf("Please enter the x coordinate of where you want to hit: ");
+			scanf("%d", &x);
+			if (x<0 || x>7){
+				printf("Please enter a value between 0 and 7.");
+			}
+		}
+		int y=-1;
+		while (y<0 || y>7){
+			printf("Please enter the y coordinate of where you want to hit: ");
+			scanf("%d", &y);
+			if (y<0 || y>7){
+				printf("Please enter a value between 0 and 7.");
+			}
+		}
+		if (gameboard[y][x]==1 || gameboard[y][x]==2 || gameboard[y][x]>10 ){
+			printf("you've already tried hitting this spot! Try a different coordinate \n");
+		} else if (gameboard[y][x]>2 && gameboard[y][x]<10){
+			printf("HIT!");
+			int id = gameboard[y][x];
+			gameboard[y][x]=id+10;
+			return id;
+			//logic to check if the boat is sunk
+		} else {
+			printf("Nothing is there...");
+			gameboard[y][x]=4;
+			return 0;
+		}
+	}
+}
+
 int main(int argc, char **argv){
 	
 	int gameboardPlayer[8][8];
@@ -324,6 +363,19 @@ int main(int argc, char **argv){
 	//
 	struct boat *fleetPlayer = populatePlayerBoard(gameboardPlayer);
 	struct boat *fleetComp = populateComputerBoard(gameboardComputer);
+	
+	bool win=false;
+	while (!win){
+		printf("************************************************************************\n");
+		printf("Your turn!\n");
+		printGameBoardInPlay(gameboardComputer);
+		int id = getHitCoordinate(gameboardComputer);
+		
+		if (id>0){
+			//update number of hits in object
+			//find out if its sunk
+		}
+	}
 	
 	
 	return 0;
