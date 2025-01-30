@@ -346,6 +346,53 @@ int getHitCoordinate(int gameboard[8][8]){
 	}
 }
 
+bool checkSunk(struct boat item, int gameboard[8][8]){
+	int direction=item.direction;
+	int x=item.x;
+	int y=item.y;
+	int len = item.length;
+	bool sunk=true;
+	while (len!=0 && sunk){
+		if (gameboard[y][x]=item.id+10){
+			
+			if (direction==3){
+				y++;
+			} else if (direction==2){
+				y--;
+			} else if (direction == 0){
+				x--;
+			} else {
+				x++;
+			}
+			len--;
+			
+		} else{
+			sunk=false;
+		}
+	}
+	return sunk;
+}
+
+void sinkBoat(struct boat item, int gameboard[8][8]){
+	int direction=item.direction;
+	int x=item.x;
+	int y=item.y;
+	int len = item.length;
+	while (len!=0){
+		gameboard[y][x]=2;
+		if (direction==3){
+			y++;
+		} else if (direction==2){
+			y--;
+		} else if (direction == 0){
+			x--;
+		} else {
+			x++;
+		}
+		len--;
+	}
+}
+
 int main(int argc, char **argv){
 	
 	int gameboardPlayer[8][8];
@@ -372,6 +419,12 @@ int main(int argc, char **argv){
 		int id = getHitCoordinate(gameboardComputer);
 		
 		if (id>0){
+			fleetComp[id-3].hits++;
+			bool sunk = checkSunk(fleetComp[id-3], gameboardComputer);
+			if (sunk){
+				printf("You've sunk a ship!");
+				sinkBoat(fleetComp[id-3], gameboardComputer);
+			}
 			//update number of hits in object
 			//find out if its sunk
 		}
