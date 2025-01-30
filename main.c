@@ -393,6 +393,15 @@ void sinkBoat(struct boat item, int gameboard[8][8]){
 	}
 }
 
+bool checkWin(struct boat *fleet){
+	for (int i =0; i<sizeof(fleet); i++){
+		if (fleet[i].hits!=fleet[i].length){
+			return false;
+		}
+	}
+	return true;
+}
+
 int main(int argc, char **argv){
 	
 	int gameboardPlayer[8][8];
@@ -412,7 +421,8 @@ int main(int argc, char **argv){
 	struct boat *fleetComp = populateComputerBoard(gameboardComputer);
 	
 	bool win=false;
-	while (!win){
+	bool lose = false;
+	while (!win || !lose){
 		printf("************************************************************************\n");
 		printf("Your turn!\n");
 		printGameBoardInPlay(gameboardComputer);
@@ -422,12 +432,16 @@ int main(int argc, char **argv){
 			fleetComp[id-3].hits++;
 			bool sunk = checkSunk(fleetComp[id-3], gameboardComputer);
 			if (sunk){
-				printf("You've sunk a ship!");
+				printf("You've sunk a ship!\n");
 				sinkBoat(fleetComp[id-3], gameboardComputer);
+				printGameBoardInPlay(gameboardComputer);
+				bool win = checkWin(fleetComp);
 			}
-			//update number of hits in object
-			//find out if its sunk
 		}
+		printf("\n");
+	}
+	if (win){
+		printf("Congratulation Player! You've successfully located the battleships!");
 	}
 	
 	
